@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+.env.*
+
+# PyInstaller
+build/
+dist/
+*.spec
+
+# Log files and locks
+*.log
+*.log.old
+*.lock
+gemini_corrector.lock
+
+# Local-only files (old version, personal notes)
+app_backup.py
+*.local.*
