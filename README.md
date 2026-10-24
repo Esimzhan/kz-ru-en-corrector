@@ -77,3 +77,7 @@ pyinstaller --onefile --noconsole --name "GeminiCorrector" app.py
 ```
 
 The file is created in `dist\GeminiCorrector.exe`. The API key still comes from the environment variable, not from the .exe.
+
+## License
+
+[MIT](LICENSE)
