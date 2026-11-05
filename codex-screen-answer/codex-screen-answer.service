@@ -1,0 +1,14 @@
+[Unit]
+Description=Copy Codex answers to screen questions with Alt+C
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/apps/kz-ru-en-corrector/codex-screen-answer
+ExecStart=%h/apps/kz-ru-en-corrector/codex-screen-answer/.venv/bin/python %h/apps/kz-ru-en-corrector/codex-screen-answer/app.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target

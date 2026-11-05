@@ -7,6 +7,12 @@ venv/
 env/
 .env
 .env.*
+api_key
+api_key.*
+*.pem
+*.key
+.codex/
+.config/
 
 # PyInstaller
 build/
@@ -22,3 +28,12 @@ gemini_corrector.lock
 # Local-only files (old version, personal notes)
 app_backup.py
 *.local.*
+
+# Personal AI reference files stay on this computer.
+knowledge/*
+!knowledge/.gitkeep
+
+# Screen captures are private and never belong in the repository.
+codex-screen-answer/*.png
+codex-screen-answer/*.jpg
+codex-screen-answer/*.jpeg

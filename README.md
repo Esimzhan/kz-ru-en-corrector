@@ -48,6 +48,65 @@ Typical times: 0.6–1.5 s with Gemini, about 1.5–2.5 s with the local model o
    The tray icon appears after a 10-second delay (so it also works when started at boot).
 5. *(Optional)* Start it with Windows: press `Win + R`, type `shell:startup`, and put a shortcut there to `pythonw.exe "C:\path\to\app.py"`.
 
+## Linux (X11)
+
+`app_linux.py` is the same app for Linux desktops running X11 (not Wayland): same models, prompt and hotkeys. Tested on Ubuntu 22.04 with GNOME.
+
+1. Install the system packages and the Python dependencies:
+   ```bash
+   sudo apt install xclip gir1.2-ayatanaappindicator3-0.1
+   python3 -m venv --system-site-packages .venv   # system packages give the tray icon access to GTK
+   .venv/bin/pip install pyperclip pystray pillow python-xlib
+   ```
+2. Put your API key in `~/.config/gemini-corrector/api_key` (`chmod 600` it), or set `GEMINI_API_KEY`.
+3. Start it at login with a systemd user service (`~/.config/systemd/user/gemini-corrector.service`):
+   ```ini
+   [Unit]
+   PartOf=graphical-session.target
+   After=graphical-session.target
+
+   [Service]
+   ExecStart=/path/to/.venv/bin/python /path/to/app_linux.py
+   Restart=on-failure
+   RestartSec=5
+
+   [Install]
+   WantedBy=graphical-session.target
+   ```
+   then `systemctl --user enable --now gemini-corrector`.
+
+Differences from Windows: errors appear as desktop notifications, the log is in `~/.cache/gemini-corrector/`, `Ctrl+Alt+Z` also reaches the focused app (it isn't swallowed), and the hotkeys don't work in terminals, where `Ctrl+C` interrupts instead of copying. Ollama is used if `ollama` is installed; otherwise the app uses Gemini only.
+
+The separate [Codex Screen Answer](codex-screen-answer/README.md) app runs in
+the background: press Alt+C to send the whole screen and the same knowledge
+files to Codex, then paste its short answer with Ctrl+V.
+
+### Short answers and Markdown references (Linux)
+
+Hold **Ctrl**, tap **A**, then **S** within 0.4 seconds. The app selects all text in
+the current editable field and replaces the question with a short answer. For a
+test, it requests the correct option letter and full answer text (for example,
+`1. B. There is no effect.`), without explanations, keeping question numbers for
+multiple questions. Calculations are checked against the reference definitions
+before choosing an option. Other answers are limited by the prompt to 1–3
+short sentences. Ordinary Ctrl+S still saves; S is captured only during this sequence.
+
+Put your UTF-8 `.md` files directly inside **`knowledge/`**, next to `app_linux.py`.
+You can open it from the tray menu → **Open reference folder**. All Markdown files
+are reloaded for every question, so additions and edits need no restart. Personal
+reference files are ignored by Git. Subfolders and symbolic links are not loaded.
+
+Both Ctrl+A+S and the existing `\question` mode receive these references. When
+nonempty files are present, the model is instructed to answer only from them,
+and to say when information is missing or conflicting. With no reference content,
+it uses general knowledge. Spelling correction does not use the files. Short-answer
+formatting applies only to Ctrl+A+S. Model answers can still be wrong.
+
+The question and full reference content are sent to Gemini with each answer
+request. The combined Markdown limit is 512 KB; oversized or unreadable files
+produce an error instead of silently dropping context. Answer mode uses Gemini,
+without the small local spelling model.
+
 ## Settings
 
 All settings are at the top of `app.py`:
@@ -68,6 +127,10 @@ All settings are at the top of `app.py`:
 - **The API key** is read from the `GEMINI_API_KEY` environment variable and sent only to Google, in a request header over HTTPS. It is never logged.
 - **The log** (`%TEMP%\gemini_corrector_debug.log`) records timings, model names and errors, but **not your text** unless you turn on `LOG_TEXT`. It is rotated at 1 MB.
 - **Clipboard:** the app uses the clipboard to copy and paste, then restores what you had before. If Windows clipboard history (`Win + V`) is on, the copied text may appear there.
+- **Local files stay local:** API key files, `.env` files, virtual environments,
+  logs, screenshots and all Markdown files under `knowledge/` are ignored by Git.
+  The tracked `.gitkeep` only preserves an empty knowledge folder. Check
+  `git status` before committing any new file that may contain personal data.
 
 ## Building an .exe
 
